@@ -55,10 +55,10 @@
 - MYSQL_PASSWORD: laravel_pass
 
 ## テーブル設計
-![](./table.drawio)
+![](./table.drawio.svg)
 
 ## ER図
-![](./er.drawio)
+![](./er.drawio.svg)
 
 ## 他に記載することがあれば記述する
 <!-- - 例)アカウントの種類(テストユーザーなど) -->

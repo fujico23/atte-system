@@ -1,0 +1,10 @@
+.content__inner {
+    width: 400px;
+    margin: 76px auto 130px;
+    text-align: center;
+}
+
+.auth-form__inner {
+    margin: 45px 0 16px;
+    width: 100%;
+}

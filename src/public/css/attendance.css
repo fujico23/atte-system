@@ -1,0 +1,44 @@
+.content__inner {
+    width: 1230px;
+    margin: 76px auto 62px;
+    text-align: center;
+}
+/* 日付送り */
+.date__inner {
+    display: flex;
+    justify-content: space-around;
+    margin: 0 auto;
+    width: 300px;
+}
+
+.date__link {
+    display: block;
+    width: 40px;
+    height: 30px;
+    text-decoration: none;
+    border: 1px solid #214BE0;
+    border-radius: 2px;
+    background-color: #FFF;
+    color: #214BE0;
+}
+
+.attendance__table {
+    margin: 45px 0 16px;
+    border-top: 1px solid #aeaeae;
+    border-collapse: collapse;
+    width: 100%;
+}
+.table__header,
+.table__row {
+    border-top: 1px solid #989898;
+}
+
+.table__header th,
+.table__row td{
+    padding: 24px;
+}
+
+.table__row td {
+    font-weight: bold;
+    font-size: 16px;
+}

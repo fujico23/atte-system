@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+//ミドルウェアの記述
+//Route::middleware('auth')->group(function () {
+//    Route::get('/', [AuthController::class, 'create']);
+//    Route::get('/', [AuthController::class, 'index']);
+//});
+
+Route::get('/', [AuthController::class, 'create']);
+Route::get('/attendance', [AuthController::class, 'index']);

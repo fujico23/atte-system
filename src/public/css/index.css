@@ -1,0 +1,29 @@
+.content__inner {
+    width: 1230px;
+    margin: 76px auto 62px;
+    text-align: center;
+}
+
+.attendance-system {
+    margin: 54px auto 157px;
+    width: 85%;
+}
+
+.work__group,
+.break__group {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.work__group {
+    margin-bottom: 50px;
+}
+
+.work__group input,
+.break__group input {
+    width: 45%;
+    height: 200px;
+    background-color: #FFF;
+    font-size: 24px;
+    font-weight: bold;
+}

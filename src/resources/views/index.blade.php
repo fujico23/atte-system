@@ -8,14 +8,16 @@
 <div class="content__inner">
     <h2 class="form__heading">{{ $name }}さんお疲れ様です！</h2>
     <div class="attendance-system">
-        <form action="">
+        <form action="/store" method="post">
+            @csrf
+            <input type="hidden" name="date" value="{{ $date }}">
             <div class="work__group">
-                <input type="submit" name="work_start" value="勤務開始">
-                <input type="submit" name="work_end" value="勤務終了">
+                <button type="submit" name="action" value="work_start">勤務開始</button>
+                <button type="submit" name="action" value="work_end" >勤務終了</button>
             </div>
             <div class="break__group">
-                <input type="submit" name="break_start" value="休憩開始">
-                <input type="submit" name="break_end" value="休憩終了">
+                <button type="submit" name="action" value="break_start">休憩開始</button>
+                <button type="submit" name="action" value="break_end">休憩終了</button>
             </div>
         </form>
     </div>

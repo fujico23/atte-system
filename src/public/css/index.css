@@ -19,8 +19,8 @@
     margin-bottom: 50px;
 }
 
-.work__group input,
-.break__group input {
+.work__group button,
+.break__group button {
     width: 45%;
     height: 200px;
     background-color: #FFF;

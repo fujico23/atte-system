@@ -21,4 +21,5 @@ use App\Http\Controllers\AuthController;
 //});
 
 Route::get('/', [AuthController::class, 'create']);
+Route::post('/store', [AuthController::class, 'store']);
 Route::get('/attendance', [AuthController::class, 'index']);

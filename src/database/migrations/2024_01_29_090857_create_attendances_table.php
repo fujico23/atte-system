@@ -19,8 +19,6 @@ class CreateAttendancesTable extends Migration
             $table->date('date')->default(now()->toDateString());
             $table->dateTime('work_start')->nullable();
             $table->dateTime('work_end')->nullable();
-            $table->dateTime('break_start')->nullable();
-            $table->dateTime('break_end')->nullable();
             $table->timestamp('created_at')->useCurrent()->nullable();
             $table->timestamp('updated_at')->useCurrent()->nullable();
         });

@@ -8,9 +8,9 @@
 <div class="content__inner">
     <div class="date">
         <div class="date__inner">
-          <a href="" class="date__link"> < </a>
-          <h2 class="form__heading">2021-11-01</h2>
-          <a href="" class="date__link"> > </a>
+              <a href="{{ route('attendance.previous') }}"  class="date__link" > < </a>
+               <h2 class="form__heading">{{ $date }}</h2>
+              <a href="{{ route('attendance.next') }}" class="date__link"> > </a>
         </div>
     </div>
     <table class="attendance__table">
@@ -44,18 +44,20 @@
         </tr>
         <tr class="table__row">
             <td>テスト四郎</td>
-            <td>10:00:20</td>
+            <td>10:00:10</td>
             <td>20:00:00</td>
             <td>00:30:00</td>
-            <td>09:29:40</td>
+            <td>09:29:50</td>
         </tr>
+        @foreach ($dates as $date)
         <tr class="table__row">
-            <td>テスト五郎</td>
-            <td>10:00:20</td>
-            <td>20:00:00</td>
-            <td>00:30:00</td>
-            <td>09:29:40</td>
+            <td>{{ $date['name'] }}</td>
+            <td>{{ $date['work_start'] }}</td>
+            <td>{{ $date['work_end'] }}</td>
+            <td>{{ gmdate("H:i:s", $date['total_rest_time']) }}</td>
+            <td>{{ $date['total_work_time'] }}</td>
         </tr>
+        @endforeach
     </table>
     <div class="pagenation">12345678910...2021</div>
 

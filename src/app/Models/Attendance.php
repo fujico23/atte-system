@@ -10,10 +10,24 @@ class Attendance extends Model
     use HasFactory;
 
     protected $guarded = [];
-    protected $fillable= ['user_id', 'date', 'work_start', 'work_end', 'break_start', 'break_end'];
+    protected $fillable= ['user_id', 'date', 'work_start', 'work_end'];
 
     public function user ()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function rests ()
+    {
+        return $this->hasMany(Rest::class);
+    }
+
+    public function previous()
+    {
+        return $this->where('date', '<', $this->date)->orderBy('date', 'desc')->get();
+    }
+    public function next()
+    {
+        return $this->where('date', '>', $this->date)->orderBy('date', 'asc')->get();
     }
 }

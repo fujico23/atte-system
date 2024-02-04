@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Middleware\AuthMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +23,6 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/', [AuthController::class, 'create']);
 Route::post('/store', [AuthController::class, 'store']);
-Route::get('/attendance', [AuthController::class, 'index']);
+Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
+Route::get('/attendance/previous', [AuthController::class, 'index'])->name('attendance.previous');
+Route::get('/attendance/next', [AuthController::class, 'nextDate'])->name('attendance.next');

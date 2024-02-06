@@ -24,5 +24,5 @@ use App\Http\Middleware\AuthMiddleware;
 Route::get('/', [AuthController::class, 'create']);
 Route::post('/store', [AuthController::class, 'store']);
 Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
-Route::get('/attendance/previous', [AuthController::class, 'index'])->name('attendance.previous');
-Route::get('/attendance/next', [AuthController::class, 'nextDate'])->name('attendance.next');
+//Route::get('/attendance/previous', [AuthController::class, 'previous'])->name('attendance.previous');
+//Route::get('/attendance/next', [AuthController::class, 'nextDate'])->name('attendance.next');

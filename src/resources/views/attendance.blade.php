@@ -8,9 +8,11 @@
 <div class="content__inner">
     <div class="date">
         <div class="date__inner">
-              <a href="{{ route('attendance.previous') }}"  class="date__link" > < </a>
-               <h2 class="form__heading">{{ $date }}</h2>
-              <a href="{{ route('attendance.next') }}" class="date__link"> > </a>
+            @if ($previousAttendance)
+              <a href="{{ route('attendance.index', $previousAttendance) }}"  class="date__link" > < </a>
+            @endif
+               <h2 class="form__heading">{{ $newestDate }}</h2>
+              <a href="{{ route('attendance.index') }}" class="date__link"> > </a>
         </div>
     </div>
     <table class="attendance__table">

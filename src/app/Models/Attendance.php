@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Attendance extends Model
 {
@@ -24,7 +25,7 @@ class Attendance extends Model
 
     public function previous()
     {
-        return $this->where('date', '<', $this->date)->orderBy('date', 'desc')->get();
+        return self::whereDate('date', '<', Carbon::today())->orderBy('date', 'desc')->first();
     }
     public function next()
     {

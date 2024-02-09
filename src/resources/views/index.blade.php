@@ -23,17 +23,25 @@
                 @endif
             </div>
             <div class="break__group">
-                @if(!$rest_start_defined && !$rest_end_defined)
+                <!-- 打刻前　-->
+                @if(!$work_start_defined && !$rest_start_defined && !$rest_end_defined && !$work_end_defined)
                 <button type="submit" name="action" value="rest_start" disabled>休憩開始</button>
                 <button type="submit" name="action" value="rest_end" disabled>休憩終了</button>
-                @elseif ($rest_start_defined && !$rest_end_defined)
+                <!-- 出勤中　就業中 いつでも休憩取れる -->
+                @elseif ($work_start_defined && !$rest_start_defined && !$rest_end_defined && !$work_end_defined)
+                <button type="submit" name="action" value="rest_start" >休憩開始</button>
+                <button type="submit" name="action" value="rest_end" disabled>休憩終了</button>
+                <!-- 出勤中　休憩中 休憩終了出来る-->
+                @elseif ($work_start_defined && $rest_start_defined && !$rest_end_defined && !$work_end_defined)
                 <button type="submit" name="action" value="rest_start" disabled>休憩開始</button>
-                <button type="submit" name="action" value="rest_end">休憩終了</button>
-                @elseif ($rest_start_defined && !$rest_end_defined)
+                <button type="submit" name="action" value="rest_end" >休憩終了</button>
+                <!-- 出勤中　休憩終了　2回目の休憩取れる -->
+                @elseif ($work_start_defined && $rest_start_defined && $rest_end_defined && !$work_end_defined )
+                <button type="submit" name="action" value="rest_start" >休憩開始</button>
+                <button type="submit" name="action" value="rest_end" disabled>休憩終了</button>
+                <!-- 退勤処理 休憩開始・休憩終了処理不可になる -->
+                @elseif ($work_start_defined && $work_end_defined)
                 <button type="submit" name="action" value="rest_start" disabled>休憩開始</button>
-                <button type="submit" name="action" value="rest_end">休憩終了</button>
-                @elseif ($rest_start_defined && $rest_end_defined)
-                <button type="submit" name="action" value="rest_start">休憩開始</button>
                 <button type="submit" name="action" value="rest_end" disabled>休憩終了</button>
                 @endif
             </div>

@@ -24,6 +24,12 @@
                 {{ $message }}
                 @enderror
             </p>
+            <p class="auth-form__remember">
+                <label for="remember">
+                    <input id="remember" type="checkbox" name="remember">
+                    <span class="">ログイン状態を保持する</span>
+                </label>
+            </p>
             <div class="auth-form__group">
                 <input class="auth-form__group__button" type="submit" value="ログイン">
             </div>

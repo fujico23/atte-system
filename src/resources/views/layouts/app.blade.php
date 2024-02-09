@@ -7,7 +7,6 @@
     <title>Atte</title>
     <link rel="stylesheet" href="https://unpkg.com/ress/dist/ress.min.css" />
     <link rel="stylesheet" href="{{ asset('css/common.css')}}">
-
     @yield('css')
 </head>
 
@@ -33,7 +32,7 @@
             </ul>
             @yield('link')
         </header>
-        <main>
+        <main class="main">
             <div class="content">
                 @yield('content')
             </div>

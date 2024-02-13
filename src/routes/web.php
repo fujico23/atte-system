@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Middleware\AuthMiddleware;
+use Laravel\SerializableClosure\Serializers\Signed;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,14 +18,26 @@ use App\Http\Middleware\AuthMiddleware;
 |
 */
 
-//ミドルウェアの記述
-//Route::middleware('auth')->group(function () {
-//    Route::get('/', [AuthController::class, 'create']);
-//    Route::get('/', [AuthController::class, 'index']);
-//});
+Route::middleware('auth')->group(function () {
+    Route::get('/', [AuthController::class, 'create']);
+    Route::post('/store', [AuthController::class, 'store']);
+    Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
+});
 
-Route::get('/', [AuthController::class, 'create']);
-Route::post('/store', [AuthController::class, 'store']);
-Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
-//Route::get('/attendance/previous', [AuthController::class, 'previous'])->name('attendance.previous');
-//Route::get('/attendance/next', [AuthController::class, 'nextDate'])->name('attendance.next');
+//メール確認の通知
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+//メール確認のハンドラ
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+//メール確認の再送信
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');

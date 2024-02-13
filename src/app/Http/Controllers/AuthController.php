@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Attendance;
 use App\Models\Rest;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use DateTime;
 
@@ -16,13 +19,13 @@ class AuthController extends Controller
     public function create()
     {
         $name = Auth::user()->name;
-        $user_id = Auth::id();
+        $loginUser_id = Auth::id();
         $date = now()->toDateString();
 
         //AttendanceモデルとRestモデルのuser_idとログインユーザーのidが一致する最新の最初のレコードを取得
-        $attendance = Attendance::where('user_id', $user_id)->whereDate('date', $date)->latest()->first();
+        $attendance = Attendance::where('user_id', $loginUser_id)->whereDate('date', $date)->latest()->first();
 
-        $rest = Rest::where('user_id', $user_id)->latest()->first();
+        $rest = Rest::where('user_id', $loginUser_id)->latest()->whereDate('date', $date)->first();
 
         // 勤務開始・休憩開始・休憩終了時間が設定されているかを確認する
         $work_start_defined = $attendance ? $attendance->work_start !== null : false;
@@ -44,7 +47,7 @@ class AuthController extends Controller
                 ->whereDate('date', now()->toDateString())
                 ->whereNotNull('work_start')
                 ->first();
-            //もしあれば何もしない
+            //勤務開始してる場合としていない場合の処理
             if ($existWorkStart) {
                 //時刻を更新する場合は$existWorkStart->update(['work_start' => now()]);
             } else { //もしなければwork_startを取得する
@@ -54,17 +57,21 @@ class AuthController extends Controller
                     'date' => now()->toDateString()
                 ]);
             }
-        } elseif ($action === 'work_end') { //勤務終了処理
-            //nullじゃない勤務開始データを取得(勤務開始が押されているか確認)
+        } elseif ($action === 'work_end') {
+            //勤務開始しているか確認する
             $attendance = Attendance::where('user_id', $user_id)
                 ->whereNotNull('work_start')
                 ->latest()
                 ->first();
-            if ($attendance) { //勤務開始されているなら勤務終了を更新出来る
+            //勤務開始している場合としていない場合の処理
+            if ($attendance) {
                 $attendance->update(['work_end' => now()]);
             }
         } elseif ($action === 'rest_start') {
-            $attendance = Attendance::where('user_id', $user_id)->whereDate('date', now()->toDateString())->latest()->first();
+            $attendance = Attendance::where('user_id', $user_id)
+                ->whereDate('date', now()->toDateString())
+                ->latest()
+                ->first();
             if ($attendance && $attendance->id) {
                 Rest::create([
                     'user_id' => $user_id,
@@ -93,25 +100,19 @@ class AuthController extends Controller
         if (!$date) {
             $date = now()->format('Y-m-d');
         }
-
-        // Attendanceモデルからdateカラムとリクエストのdateが一致する今日の日付が一致するものを探し
-        //date,user_id,work_start,work_endのレコードを取得する
+        //前後の日付を取得
+        $previousDate = Attendance::whereDate('date', '<', $date)->orderBy('date', 'desc')->value('date');
+        $nextDate = Attendance::whereDate('date', '>', $date)->orderBy('date', 'asc')->value('date');
+        // Attendanceモデルのdateとパラメータのdateが一致するdate,user_id,work_start,work_endのレコードをグループ化して取得する
         $attendances = Attendance::whereDate('date', $date)
             ->select('date', 'user_id', 'work_start', 'work_end')
-            ->groupBy('date', 'user_id', 'work_start', 'work_end')
-            ->get();
-        $newestDate = Attendance::latest('date')->value('date');
-        //前後の日付を取得
-        $previousAttendance = Attendance::whereDate('date', '<', $date)->orderBy('date', 'desc')->value('date'); //前日の日付
-        $nextAttendance = Attendance::whereDate('date', '>', $date)->orderBy('date', 'asc')->first();
 
+            ->get();
 
         foreach ($attendances as $attendance) {
-            // 今日の日付
-            $date = $attendance->date;
-            // 今日のユーザーid
+            //パラメータのdateのユーザーid
             $user = User::find($attendance->user_id);
-            // 今日の勤務開始時間と勤務終了時間
+            //パラメータのdateの勤務開始時間と勤務終了時間
             $work_start = new DateTime($attendance->work_start);
             $work_end = new DateTime($attendance->work_end);
             if ($work_start && $work_end) {
@@ -124,29 +125,27 @@ class AuthController extends Controller
                 ->whereDate('date', Carbon::today()->toDateString())
                 ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
 
-
-
             $dates[] = [
-                //'date' => $date,
                 'name' => $user->name,
                 'work_start' => Carbon::parse($attendance->work_start)->format('H:i:s'),
                 'work_end' => Carbon::parse($attendance->work_end)->format('H:i:s'),
                 'total_rest_time' => $total_rest_time,
                 'total_work_time' => $total_work_time
             ];
+
+            //ページネーション処理
+            $collection = collect($dates);
+            $query = $attendance->date;
+            $path = '/attendance/' . $query;
+            $datesPaginate = $this->paginate($collection, 5, null, ['path' => $path]);
         }
-        return view('attendance', compact('dates', 'date', 'newestDate', 'previousAttendance', 'nextAttendance'));
+        return view('attendance', compact('dates', 'date', 'previousDate', 'nextDate', 'datesPaginate'));
     }
-
-    public function previousDate()
+    //ページネーションメソッド
+    private function paginate($items, $perPage = 5, $page = null, $options = [])
     {
-        $previousDate = Carbon::now()->subDay()->format('Y-m-d');
-
-        return $this->index($previousDate);
-    }
-    public function nextDay()
-    {
-        $nextDate = Carbon::today()->addDay()->format('Y-m-d');
-        return redirect()->route('attendance.index', ['date' => $nextDate]);
+        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+        $items = $items instanceof Collection ? $items : Collection::make($items);
+        return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
     }
 }

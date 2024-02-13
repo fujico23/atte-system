@@ -51,8 +51,11 @@ body {
 .content {
   justify-content: center;
   background-color: #F2F2F2;
-  width: 100vw;
+  width: 100%;
   border: 1px #F2F2F2 solid;
+}
+.content.submitting {
+  background-color: #007BFF;
 }
 
 .form__heading {
@@ -67,6 +70,10 @@ body {
   border-radius: 3px;
   margin-top: 16px;
 }
+.auth-form__remember {
+  margin-top: 16px;
+}
+
 .auth-form__group input {
   width: 100%;
   border: none;
@@ -85,7 +92,7 @@ body {
 
 /* ログイン・新規会員ボタン */
 .auth-form__group__button {
-  background-color: #214BE0;
+  background-color: #007BFF;
   width: 100%;
   border: none;
   color: #FFF;

@@ -24,7 +24,6 @@ class AuthController extends Controller
 
         //AttendanceモデルとRestモデルのuser_idとログインユーザーのidが一致する最新の最初のレコードを取得
         $attendance = Attendance::where('user_id', $loginUser_id)->whereDate('date', $date)->latest()->first();
-
         $rest = Rest::where('user_id', $loginUser_id)->latest()->whereDate('date', $date)->first();
 
         // 勤務開始・休憩開始・休憩終了時間が設定されているかを確認する
@@ -40,6 +39,7 @@ class AuthController extends Controller
     {
         $action = $request->input('action');
         $user_id = Auth::id();
+        $name = Auth::user()->name;
 
         if ($action === 'work_start') {
             //1日1度しか勤務開始を取得できないようにする処理
@@ -56,6 +56,7 @@ class AuthController extends Controller
                     'work_start' => now(),
                     'date' => now()->toDateString()
                 ]);
+                $message = $name . 'さん、今日も一日頑張りましょう！';
             }
         } elseif ($action === 'work_end') {
             //勤務開始しているか確認する
@@ -66,6 +67,7 @@ class AuthController extends Controller
             //勤務開始している場合としていない場合の処理
             if ($attendance) {
                 $attendance->update(['work_end' => now()]);
+                $message = $name . 'さん、１日お疲れ様でした！';
             }
         } elseif ($action === 'rest_start') {
             $attendance = Attendance::where('user_id', $user_id)
@@ -79,6 +81,7 @@ class AuthController extends Controller
                     'rest_start' => now(),
                     'date' => now()->toDateString(),
                 ]);
+                $message = '休憩開始！ゆっくり休みましょう！';
             } else {
                 //attendance_idがない場合の処理を定義。エラー処理を行うか、何もしないか…
             }
@@ -89,48 +92,52 @@ class AuthController extends Controller
                 ->first();
             if ($rest) {
                 $rest->update(['rest_end' => now()]);
+                $message = '休憩終了！お仕事頑張りましょう！';
             }
         }
-        return redirect()->back();
+        return redirect()->back()->with('message', $message);
     }
 
     public function index($date = null)
     {
-        //日付が指定されていない場合は今日の日付を使用
+        //日付が指定されていない場合は最新の日付を使用
         if (!$date) {
-            $date = now()->format('Y-m-d');
+            $date = Attendance::latest()->value('date');
         }
         //前後の日付を取得
         $previousDate = Attendance::whereDate('date', '<', $date)->orderBy('date', 'desc')->value('date');
         $nextDate = Attendance::whereDate('date', '>', $date)->orderBy('date', 'asc')->value('date');
-        // Attendanceモデルのdateとパラメータのdateが一致するdate,user_id,work_start,work_endのレコードをグループ化して取得する
+        // Attendanceモデルのdateとパラメータのdateが一致するdate,user_id,work_start,work_endのレコードを取得する
         $attendances = Attendance::whereDate('date', $date)
             ->select('date', 'user_id', 'work_start', 'work_end')
-
+            ->with('rests')
             ->get();
 
         foreach ($attendances as $attendance) {
             //パラメータのdateのユーザーid
             $user = User::find($attendance->user_id);
             //パラメータのdateの勤務開始時間と勤務終了時間
+
             $work_start = new DateTime($attendance->work_start);
             $work_end = new DateTime($attendance->work_end);
-            if ($work_start && $work_end) {
-                $work_time = $work_end->diff($work_start);
-                $work_time_interval = $work_time->s + $work_time->i * 60 + $work_time->h * 3600;
-                $total_work_time = gmdate("H:i:s", $work_time_interval);
-            }
+            //if ($work_start && $work_end) {
+            $work_diff = $work_end->diff($work_start);
+            $work_time_interval = $work_diff->s + $work_diff->i * 60 + $work_diff->h * 3600;
+            $total_work_time = gmdate("H:i:s", $work_time_interval);
+            //}
             //Restモデルからuser_idとattendanceのuser_idが一致するものを探し
             $total_rest_time = Rest::where('user_id', $attendance->user_id)
-                ->whereDate('date', Carbon::today()->toDateString())
+                ->whereDate('date', $date)
+                //->whereDate('date', Carbon::today()->toDateString())
                 ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
+
 
             $dates[] = [
                 'name' => $user->name,
                 'work_start' => Carbon::parse($attendance->work_start)->format('H:i:s'),
-                'work_end' => Carbon::parse($attendance->work_end)->format('H:i:s'),
+                'work_end' => $attendance->work_end ? Carbon::parse($attendance->work_end)->format('H:i:s') : '打刻漏れ',
                 'total_rest_time' => $total_rest_time,
-                'total_work_time' => $total_work_time
+                'total_work_time' => $attendance->work_end ? $total_work_time : '未取得'
             ];
 
             //ページネーション処理
@@ -139,7 +146,7 @@ class AuthController extends Controller
             $path = '/attendance/' . $query;
             $datesPaginate = $this->paginate($collection, 5, null, ['path' => $path]);
         }
-        return view('attendance', compact('dates', 'date', 'previousDate', 'nextDate', 'datesPaginate'));
+        return view('attendance', compact('date', 'previousDate', 'nextDate', 'datesPaginate'));
     }
     //ページネーションメソッド
     private function paginate($items, $perPage = 5, $page = null, $options = [])
@@ -147,5 +154,50 @@ class AuthController extends Controller
         $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
         return new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
+    }
+
+    public function list()
+    {
+        $users = User::all();
+        return view('list', compact('users'));
+    }
+
+    public function show($id, $month = null)
+    {
+        $month = $month ? Carbon::parse($month) : Carbon::now()->startOfMonth();
+        //今月
+        $now = Carbon::now()->startOfMonth();
+        $Month = Carbon::now()->startOfMonth()->addMonthNoOverflow()->subSecond(1);
+        $thisMonth = Attendance::whereBetween('created_at', array($now, $Month));
+
+
+        $attendances = Attendance::with('rests')->where('user_id', $id)->get();
+        $name = User::where('id', $id)->value('name');
+        $items = [];
+
+        foreach ($attendances as $attendance) {
+            $date = $attendance->date;
+
+            $work_start = Carbon::parse($attendance->work_start);
+            $work_end = Carbon::parse($attendance->work_end);
+            $work_diff = $work_end->diffInSeconds($work_start);
+            $total_work_time = gmdate("H:i:s", $work_diff);
+
+            $total_rest_time = Rest::where('user_id', $attendance->user_id)
+            ->whereDate('date', $date)
+            ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
+
+            $items[] = [
+                'date' => $date,
+                'work_start' => Carbon::parse($attendance->work_start)->format('H:i:s'),
+                'work_end' => $attendance->work_end ? Carbon::parse($attendance->work_end)->format('H:i:s') : '打刻漏れ',
+                'total_rest_time' => $total_rest_time,
+                'total_work_time' => $attendance->work_end ? $total_work_time : '未取得'
+            ];
+        }
+
+
+
+        return view('detail', compact('items','name','month'));
     }
 }

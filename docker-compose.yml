@@ -41,10 +41,3 @@ services:
         ports:
             - 8080:80
 
-    mailhog:
-        image: mailhog/mailhog
-        ports:
-           - "8025:8025"
-        published: ${MAILHOG_PUBLISHED_PORT:-8025}
-        protocol: tcp
-        mode: host

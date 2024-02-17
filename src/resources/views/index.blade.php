@@ -7,7 +7,11 @@
 
 @section('content')
 <div class="content__inner">
-    <h2 class="form__heading">{{ $name }}さんお疲れ様です！</h2>
+    @if(session('message'))
+    <h2 class="form__heading">{{ session('message') }}</h2>
+    @else
+    <h2 class="form__heading">{{ $name }}さん、お疲れ様です！</h2>
+    @endif
     <div class="attendance-system">
         <form action="/store" id="attendanceForm" method="post">
             @csrf
@@ -51,34 +55,22 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // ローカルストレージから背景色を取得
-        var savedBackgroundColor = localStorage.getItem("background-color");
-        if (savedBackgroundColor) {
-            // 背景色が保存されている場合、その色を設定
-            document.querySelector(".content").style.backgroundColor = savedBackgroundColor;
-        }
-
-        // work_endボタンがクリックされたときの処理
-        document.getElementById("work_end").addEventListener("click", function(event) {
-            event.preventDefault();
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/store", true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.setRequestHeader("X-CSRF-TOKEN", document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    // ページがリロードされた後も背景色を維持するために、ローカルストレージに保存
-                    localStorage.setItem("background-color", "lightblue");
-                    document.querySelector(".content").style.backgroundColor = "lightblue";
-                } else {
-                    // エラーが発生した場合の処理
-                }
-            };
-            xhr.send(JSON.stringify({
-                action: "work_end"
-            }));
-        });
+    document.getElementById("work_end").addEventListener("click", function(event) {
+        event.preventDefault();
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/store", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("X-CSRF-TOKEN", document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                document.querySelector(".content").style.backgroundColor = "lightblue";
+            } else {
+                // エラーが発生した場合の処理
+            }
+        };
+        xhr.send(JSON.stringify({
+            action: "work_end"
+        }));
     });
 </script>
 

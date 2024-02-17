@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [AuthController::class, 'create']);
     Route::post('/store', [AuthController::class, 'store']);
     Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
+    Route::get('/list', [AuthController::class, 'list']);
+    Route::get('/detail/{id}/{month?}', [AuthController::class, 'show']);
 });
 
 //メール確認の通知

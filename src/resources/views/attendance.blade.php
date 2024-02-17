@@ -37,7 +37,7 @@
         <tr class="table__row">
             <td>{{ $date['name'] }}</td>
             <td>{{ $date['work_start'] }}</td>
-            <td>{{ $date['work_end'] }}</td>
+            <td>{{ $date['work_end'] ?? '入力漏れ' }}</td>
             <td>{{ gmdate("H:i:s", $date['total_rest_time']) }}</td>
             <td>{{ $date['total_work_time'] }}</td>
         </tr>

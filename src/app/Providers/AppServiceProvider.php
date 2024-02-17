@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Dotenv\Validator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;

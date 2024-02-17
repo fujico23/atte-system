@@ -13,14 +13,16 @@
             <div class="auth-form__group">
                 <input type="email" name="email" value="{{ old('email') }}" placeholder="メールアドレス">
             </div>
-            <p class="auth-error">@error('email')
+            <p class="auth-error">
+                @error('email')
                 {{ $message }}
                 @enderror
             </p>
             <div class="auth-form__group">
                 <input type="password" name="password" placeholder="パスワード">
             </div>
-            <p class="auth-error">@error('password')
+            <p class="auth-error">
+                @error('password')
                 {{ $message }}
                 @enderror
             </p>

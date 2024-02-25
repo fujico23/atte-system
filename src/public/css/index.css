@@ -1,5 +1,5 @@
 .content__inner {
-    width: 1230px;
+    max-width: 1230px;
     margin: 76px auto 62px;
     text-align: center;
 }

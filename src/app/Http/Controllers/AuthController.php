@@ -196,8 +196,6 @@ class AuthController extends Controller
             ];
         }
 
-
-
         return view('detail', compact('items','name','month'));
     }
 }

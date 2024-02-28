@@ -158,8 +158,20 @@ class AuthController extends Controller
 
     public function list()
     {
-        $users = User::all();
-        return view('list', compact('users'));
+        $today = Carbon::today();
+        $users = User::with(['attendances' => function ($query) use ($today) {
+            $query->whereDate('date', $today);
+        }])->get()->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'work_start' => $user->attendances->pluck('work_start')->first(),
+                'work_end' => $user->attendances->pluck('work_end')->first()
+            ];
+        });
+
+        return view('list', compact( 'users'));
     }
 
     public function show($id, $month = null)
@@ -184,8 +196,8 @@ class AuthController extends Controller
             $total_work_time = gmdate("H:i:s", $work_diff);
 
             $total_rest_time = Rest::where('user_id', $attendance->user_id)
-            ->whereDate('date', $date)
-            ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
+                ->whereDate('date', $date)
+                ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
 
             $items[] = [
                 'date' => $date,
@@ -196,6 +208,6 @@ class AuthController extends Controller
             ];
         }
 
-        return view('detail', compact('items','name','month'));
+        return view('detail', compact('items', 'name', 'month'));
     }
 }

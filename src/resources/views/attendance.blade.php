@@ -2,7 +2,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/attendance.css')}}">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous"> -->
 @endsection
 
 @section('content')
@@ -13,9 +13,9 @@
             <a href="{{ route('attendance.index', $previousDate) }}" class="date__link"> &lsaquo; </a>
             @endif
             <h2 class="form__heading">{{ $date }}</h2>
-            @if ($nextDate)
+
             <a href="{{ route('attendance.index', $nextDate) }}" class="date__link"> &rsaquo; </a>
-            @endif
+
         </div>
     </div>
     <table class="attendance__table">
@@ -26,13 +26,6 @@
             <th>休憩時間</th>
             <th>勤務時間</th>
         </tr>
-        <!-- <tr class="table__row">
-            <td>テスト太郎</td>
-            <td>10:00:00</td>
-            <td>20:00:00</td>
-            <td>00:30:00</td>
-            <td>09:30:00</td>
-        </tr> -->
         @foreach ($datesPaginate->items() as $date)
         <tr class="table__row">
             <td>{{ $date['name'] }}</td>
@@ -43,7 +36,6 @@
         </tr>
         @endforeach
     </table>
-    <div class="pagination">{{ $datesPaginate->links('vendor.pagination.bootstrap-4') }}</div>
-
+    <div class="d-flex justify-content-center">{{ $datesPaginate->links('vendor.pagination.custom-bootstrap-4') }}</div>
 </div>
 @endsection

@@ -28,14 +28,13 @@
                 @if (!empty($user['work_start']) && !empty($user['work_end']))
                 <span style="color: grey;">退社</span>
                 @elseif (!empty($user['work_start']))
-                <span style="color: blue;">出勤</span>
+                <span style="color: blue;">勤務中</span>
                 @else
-                <span style="color: red;">公休</span>
+                <span style="color: red;">勤務外</span>
                 @endif
             </td>
         </tr>
         @endforeach
-
     </table>
 
 </div>

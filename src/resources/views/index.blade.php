@@ -6,11 +6,15 @@
 @endsection
 
 @section('content')
+
 <div class="content__inner">
     @if(session('message'))
     <h2 class="form__heading">{{ session('message') }}</h2>
     @else
     <h2 class="form__heading">{{ $name }}さん、お疲れ様です！</h2>
+    @endif
+    @if(session('message2'))
+    <span style="color: #778899;">{{ session('message2') }}</span>
     @endif
     <div class="attendance-system">
         <form action="/store" id="attendanceForm" method="post">
@@ -54,25 +58,7 @@
     </div>
 </div>
 
-<script>
-    document.getElementById("work_end").addEventListener("click", function(event) {
-        event.preventDefault();
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/store", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.setRequestHeader("X-CSRF-TOKEN", document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                document.querySelector(".content").style.backgroundColor = "lightblue";
-            } else {
-                // エラーが発生した場合の処理
-            }
-        };
-        xhr.send(JSON.stringify({
-            action: "work_end"
-        }));
-    });
-</script>
+
 
 
 @endsection

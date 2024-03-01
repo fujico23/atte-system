@@ -1,6 +1,6 @@
 html,
 body {
-  height: 100%;
+  /*height: 100%;*/
 }
 
 
@@ -47,13 +47,21 @@ body {
   font-weight: bold;
 }
 
+.header-nav__link:hover {
+  color: #757777;
+}
+
+.header-nav__button-submit:hover {
+  color: #757777;
+}
+
 /* コンテンツ */
 .content {
   justify-content: center;
   background-color: #F2F2F2;
   width: 100%;
-  border: 1px #F2F2F2 solid;
 }
+
 .content.submitting {
   background-color: #007BFF;
 }

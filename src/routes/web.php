@@ -24,6 +24,7 @@ Route::middleware('auth','verified')->group(function () {
     Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
     Route::get('/list', [AuthController::class, 'list']);
     Route::get('/detail/{id}/{month?}', [AuthController::class, 'show'])->name('detail.show');
+    Route::post('/export/{id}/{month?}', [AuthController::class, 'export'])->name('export.csv');
 });
 
 //メール確認の通知

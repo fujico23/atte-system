@@ -51,4 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Rest::class);
     }
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 }

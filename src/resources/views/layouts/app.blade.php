@@ -36,7 +36,7 @@
             @yield('link')
         </header>
         <main class="main">
-            <div class="content">
+            <div class="content" style="background-color: {{ session('message_type') === 'work_end' ? '#EEE8AA' : '#F2F2F2' }}">
                 @yield('content')
             </div>
         </main>

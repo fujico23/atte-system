@@ -2,20 +2,15 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/attendance.css')}}">
-<!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous"> -->
 @endsection
 
 @section('content')
 <div class="content__inner">
     <div class="date">
         <div class="date__inner">
-            @if ($previousDate)
             <a href="{{ route('attendance.index', $previousDate) }}" class="date__link"> &lsaquo; </a>
-            @endif
             <h2 class="form__heading">{{ $date }}</h2>
-
             <a href="{{ route('attendance.index', $nextDate) }}" class="date__link"> &rsaquo; </a>
-
         </div>
     </div>
     <table class="attendance__table">
@@ -36,6 +31,6 @@
         </tr>
         @endforeach
     </table>
-    <div class="d-flex justify-content-center">{{ $datesPaginate->links('vendor.pagination.custom-bootstrap-4') }}</div>
+    <div class="pagination">{{ $datesPaginate->links() }}</div>
 </div>
 @endsection

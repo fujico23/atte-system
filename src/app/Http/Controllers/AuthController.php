@@ -12,7 +12,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use DateTime;
+
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AuthController extends Controller
 {
@@ -67,7 +70,9 @@ class AuthController extends Controller
             //勤務開始している場合としていない場合の処理
             if ($attendance) {
                 $attendance->update(['work_end' => now()]);
-                $message = $name . 'さん、１日お疲れ様でした！';
+                $message = '本日も1日お疲れ様でした!';
+                $message2 = '※勤務終了後は背景が黄色になります';
+                session()->put('message_type', 'work_end');
             }
         } elseif ($action === 'rest_start') {
             $attendance = Attendance::where('user_id', $user_id)
@@ -95,7 +100,10 @@ class AuthController extends Controller
                 $message = '休憩終了！お仕事頑張りましょう！';
             }
         }
-        return redirect()->back()->with('message', $message);
+        return redirect()->back()->with([
+            'message' => $message,
+            'message2' => $message2
+        ]);
     }
 
     public function index($date = null)
@@ -170,31 +178,37 @@ class AuthController extends Controller
                 'work_end' => $user->attendances->pluck('work_end')->first()
             ];
         });
-
-        return view('list', compact( 'users'));
+        return view('list', compact('users'));
     }
 
     public function show($id, $month = null)
     {
-        $month = $month ? Carbon::parse($month) : Carbon::now()->startOfMonth();
-        //今月
-        $now = Carbon::now()->startOfMonth();
-        $Month = Carbon::now()->startOfMonth()->addMonthNoOverflow()->subSecond(1);
-        $thisMonth = Attendance::whereBetween('created_at', array($now, $Month));
+        if (!$month) {
+            $latestDate = Attendance::latest('created_at')->value('created_at'); // date: 2024-02-29 09:08:44.0 Asia/Tokyo (+09:00)
+            $month = Carbon::parse($latestDate)->format('Y-m'); // "2024-02"
+        } else {
+            $latestDate = Carbon::parse($month)->format('Y-m-d'); //"2024-02-29"
+        }
+        $previousMonth = Carbon::parse($latestDate)->subMonth()->format('Y-m'); //"2024-01"
+        $nextMonth = Carbon::parse($latestDate)->addMonth()->format('Y-m'); //"2024-03"
 
+        $attendances = Attendance::with('rests')
+            ->where('user_id', $id)
+            ->whereYear('date', Carbon::parse($month)->year)
+            ->whereMonth('date', Carbon::parse($month)->month)
+            ->orderBy('date')
+            ->get();
 
-        $attendances = Attendance::with('rests')->where('user_id', $id)->get();
-        $name = User::where('id', $id)->value('name');
+        $user = User::findOrFail($id);
+        $name = User::where('id', $id)->value('name'); //社員の名前
         $items = [];
 
         foreach ($attendances as $attendance) {
-            $date = $attendance->date;
-
+            $date = $attendance->date; //"2024-02-04 string"
             $work_start = Carbon::parse($attendance->work_start);
             $work_end = Carbon::parse($attendance->work_end);
             $work_diff = $work_end->diffInSeconds($work_start);
             $total_work_time = gmdate("H:i:s", $work_diff);
-
             $total_rest_time = Rest::where('user_id', $attendance->user_id)
                 ->whereDate('date', $date)
                 ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
@@ -204,10 +218,70 @@ class AuthController extends Controller
                 'work_start' => Carbon::parse($attendance->work_start)->format('H:i:s'),
                 'work_end' => $attendance->work_end ? Carbon::parse($attendance->work_end)->format('H:i:s') : '打刻漏れ',
                 'total_rest_time' => $total_rest_time,
-                'total_work_time' => $attendance->work_end ? $total_work_time : '未取得'
+                'total_work_time' => $attendance->work_end ? $total_work_time : '未取得',
+                'created_at' => $attendance->created_at,
+                'updated_at' => $attendance->updated_at
+            ];
+        }
+        return view('detail', compact('user', 'items', 'name', 'month', 'previousMonth', 'nextMonth'));
+    }
+
+    public function export($id, $month)
+    {
+        $csvData = [];
+
+        $attendances = Attendance::with('rests')
+            ->where('user_id', $id)
+            ->whereYear('date', Carbon::parse($month)->year)
+            ->whereMonth('date', Carbon::parse($month)->month)
+            ->orderBy('date')
+            ->get();
+
+        foreach ($attendances as $attendance) {
+            $date = $attendance->date; //"2024-02-04 string"
+            $work_start = Carbon::parse($attendance->work_start);
+            $work_end = Carbon::parse($attendance->work_end);
+            $work_diff = $work_end->diffInSeconds($work_start);
+            $total_work_time = gmdate("H:i:s", $work_diff);
+            $total_rest_time = Rest::where('user_id', $attendance->user_id)
+                ->whereDate('date', $date)
+                ->sum(DB::raw('TIME_TO_SEC(TIMEDIFF(rest_end, rest_start))'));
+            $total_rest_time = gmdate("G:i:s", $total_rest_time);
+            $csvData[] = [
+                'date' => $date,
+                'work_start' => Carbon::parse($attendance->work_start)->format('H:i:s'),
+                'work_end' => $attendance->work_end ? Carbon::parse($attendance->work_end)->format('H:i:s') : 'null',
+                'total_rest_time' => $total_rest_time,
+                'total_work_time' => $attendance->work_end ? $total_work_time : 'null',
+                'created_at' => $attendance->created_at,
+                'updated_at' => $attendance->created_at
+
             ];
         }
 
-        return view('detail', compact('items', 'name', 'month'));
+        $csvHeader = [
+            'date', 'work_start', 'work_end', 'total_rest_time', 'total_work_time', 'created_at', 'updated_at'
+        ];
+        $filename = "attendance_{$month}_user{$id}.csv";
+        // レスポンスとしてCSVファイルを返す
+        $response = new StreamedResponse(
+            function () use ($csvHeader, $csvData) {
+                $createdCsvFile = fopen('php://output', 'w');
+                // ヘッダーをCSVファイルに書き込む
+                fputcsv($createdCsvFile, $csvHeader);
+                // データをCSVファイルに書き込む
+                foreach ($csvData as $csvRow) {
+                    fputcsv($createdCsvFile, $csvRow);
+                }
+                fclose($createdCsvFile);
+            },
+            200,
+            [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ]
+        );
+
+        return $response;
     }
 }

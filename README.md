@@ -12,10 +12,12 @@
 勤怠の入力を気軽に出来るシステムを導入することで、ここの勤怠管理が容易となり、管理者が正当な評価を実現する。
 
 ## アプリケーションURL
-<!-- - デプロイのURLを貼り付ける -->
+- AWS http://パブリックIPv4アドレス
 <!-- - ログインなどがあれば、注意事項など -->
 
 ## 他のリポジトリ
+- GitHub SSH git@github.com:fujico23/atte-system.git
+- 
 <!-- - 関連するリポジトリがあれば記載する -->
 <!-- - 例)バックエンドのリポジトリ、フロントエンドのリポジトリ -->
 
@@ -29,6 +31,8 @@
 - 休憩終了
 - 日付別勤怠情報取得
 - ページネーション(5件ずつ取得)
+- 社員一覧ページ表示（当日の勤務状況を表示する）
+- 社員別ページ表示（社員別ページは月毎に表示する/CSVファイルを社員別・月毎にダウンロードする）
 
 
 ## 使用技術(実行環境)
@@ -49,10 +53,20 @@
 <!-- - 他の人でもプロジェクトを実行出来るようコマンドや編集ファイルを記載する -->
 
 ## 環境変数
-- MYSQL_ROOT_PASSWORD: root
-- MYSQL_DATABASE: laravel_db
-- MYSQL_USER: laravel_user
-- MYSQL_PASSWORD: laravel_pass
+### テスト環境
+- DB_CONNECTION=mysql
+- DB_HOST=mysql
+- DB_PORT=3306
+- DB_DATABASE=laravel_db
+- DB_USERNAME=laravel_user
+- DB_PASSWORD=laravel_pass
+
+- MAIL_MAILER=smtp
+- MAIL_HOST=mailhog
+- MAIL_PORT=1025
+- MAIL_USERNAME=null
+- MAIL_PASSWORD=null
+- MAIL_ENCRYPTION=null
 
 ## テーブル設計
 ![](./table.drawio.svg)

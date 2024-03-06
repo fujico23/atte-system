@@ -4,8 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Attendance;
-use App\Models\Rest;
+use Illuminate\Support\Facades\Auth;
 
 class AuthMiddleware
 {
@@ -18,18 +17,10 @@ class AuthMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-                if ($request->input('action') === 'work_end') {
-                    $date = $request->input('date');
-                    $user_id = auth()->user()->id;
-
-                    $attendance = Attendance::where('user_id', $user_id)
-                        ->where('date', $date)
-                        ->first();
-
-                    if (!$attendance || !$attendance->work_start) {
-                        return redirect()->back()->with('error', '勤務開始が記録されていません。先に勤務開始ボタンを押してください。');
+                if (Auth::id() !== 1) {
+                    abort(403, '権限のないユーザーのため表示が出来ません！');
                     }
-                }
+
 
         return $next($request);
     }

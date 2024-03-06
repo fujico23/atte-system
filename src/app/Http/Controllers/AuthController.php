@@ -60,6 +60,7 @@ class AuthController extends Controller
                     'date' => now()->toDateString()
                 ]);
                 $message = $name . 'さん、今日も一日頑張りましょう！';
+                $message2 = '';
             }
         } elseif ($action === 'work_end') {
             //勤務開始しているか確認する
@@ -87,6 +88,7 @@ class AuthController extends Controller
                     'date' => now()->toDateString(),
                 ]);
                 $message = '休憩開始！ゆっくり休みましょう！';
+                $message2 = '';
             } else {
                 //attendance_idがない場合の処理を定義。エラー処理を行うか、何もしないか…
             }
@@ -98,7 +100,12 @@ class AuthController extends Controller
             if ($rest) {
                 $rest->update(['rest_end' => now()]);
                 $message = '休憩終了！お仕事頑張りましょう！';
+                $message2 = '';
             }
+        }
+
+        if (!isset($message2)) {
+            $message2 = '※勤務終了後は背景が黄色になります'; // または適切なデフォルト値
         }
         return redirect()->back()->with([
             'message' => $message,

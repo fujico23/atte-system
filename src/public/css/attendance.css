@@ -89,6 +89,7 @@
     border: 2px solid transparent;
     border-radius: 3px;
     text-decoration: none;
+    width: 120px;
 }
 
 .table__row a:hover {

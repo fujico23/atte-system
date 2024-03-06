@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Middleware\AuthMiddleware;
+use App\Http\Middleware\Auth;
 use Laravel\SerializableClosure\Serializers\Signed;
 use Illuminate\Http\Request;
 
@@ -22,7 +22,7 @@ Route::middleware('auth','verified')->group(function () {
     Route::get('/', [AuthController::class, 'create']);
     Route::post('/store', [AuthController::class, 'store']);
     Route::get('/attendance/{date?}', [AuthController::class, 'index'])->name('attendance.index');
-    Route::get('/list', [AuthController::class, 'list']);
+    Route::get('/list', [AuthController::class, 'list'])->middleware('attendance');
     Route::get('/detail/{id}/{month?}', [AuthController::class, 'show'])->name('detail.show');
     Route::post('/export/{id}/{month?}', [AuthController::class, 'export'])->name('export.csv');
 });

@@ -22,11 +22,17 @@
                         </div>
                         @endif
 
-                        <p>{{ __('入力したメールアドレスに確認メールが届いていないかをご確認ください。') }}</p>
-                        <p>{{ __('メールが届かない場合、下のリンクをクリックして再度メールをリクエストして下さい。') }}</p>
-                         <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
+                        <p>{{ __('ご入力いただいたメールアドレスに認証リンクを送信したので、ご確認ください。') }}</p>
+                        <p>{{ __('もし認証メールが届かない場合は再送させていただきます。') }}</p>
+                        <form class="d-inline" method="POST" action="{{ route('verification.resend') }}">
                             @csrf
-                            <button type="submit" class="btn">{{ __('click here to request another') }}</button>
+                            <button type="submit" class="btn btn-verification">{{ __('認証メールを再送する') }}</button>
+                        </form>
+                        <form method="POST" action="/logout">
+                            @csrf
+                            <button type="submit" class="btn btn-logout">
+                                ログアウト
+                            </button>
                         </form>
                     </div>
                 </div>

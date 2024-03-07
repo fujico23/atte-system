@@ -60,3 +60,14 @@
     background-color: #0056b3;
     border-color: #0056b3;
   }
+
+  .btn-logout {
+    background-color: #f8f9fa;
+    border: 1px solid #3f4b59;
+    color: #4f5f70;
+    margin-top: 20px;
+    padding: 6px 12px;
+  }
+  .btn-logout:hover {
+    color: #fff;
+  }

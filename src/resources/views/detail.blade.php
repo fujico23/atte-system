@@ -8,9 +8,9 @@
 <div class="content__inner">
     <div class="date">
         <div class="date__inner">
-            <a href="{{ route('detail.show', ['id' => $user['id'], 'month' => $previousMonth]) }}" class="date__link"> &lsaquo; </a>
+            <a href="{{ route('detail.show', ['id' => $user['id'], 'month' => $previous]) }}" class="date__link"> &lsaquo; </a>
             <h2 class="form__heading">{{ $month }}</h2>
-            <a href="{{ route('detail.show', ['id' => $user['id'], 'month' => $nextMonth]) }}" class="date__link"> &rsaquo; </a>
+            <a href="{{ route('detail.show', ['id' => $user['id'], 'month' => $next]) }}" class="date__link"> &rsaquo; </a>
         </div>
         <h2 class="form__heading">{{ $name }}</h2>
     </div>
@@ -29,10 +29,10 @@
         @foreach ($items as $item)
         <tr class="table__row">
             <td>{{ $item['date'] }}</td>
-            <td>{{ $item['work_start'] }}</td>
-            <td>{{ $item['work_end'] ?? '入力漏れ' }}</td>
-            <td>{{ gmdate("H:i:s", $item['total_rest_time']) }}</td>
-            <td>{{ $item['total_work_time'] }}</td>
+            <td>{{ $item['workStart'] }}</td>
+            <td>{{ $item['workEnd'] ?? '入力漏れ' }}</td>
+            <td>{{ $item['restTime'] }}</td>
+            <td>{{ $item['workTime'] }}</td>
         </tr>
         @endforeach
     </table>
